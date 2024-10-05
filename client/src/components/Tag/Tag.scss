@@ -1,0 +1,35 @@
+$tag-colors: (
+	"blue": #3490dc,
+	"green": #38c172,
+	"yellow": #f6993f,
+	"red": #e3342f,
+	"purple": #9561e2,
+);
+
+.tag {
+	display: inline-block;
+	padding: 0.25rem 0.5rem;
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: #fff;
+	border-radius: 9999px;
+	border: none;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	user-select: none;
+
+	@each $color, $value in $tag-colors {
+		&.tag-#{$color} {
+			background-color: $value;
+
+			&:hover {
+				background-color: darken($value, 10%);
+			}
+
+			&.selected {
+				background-color: darken($value, 20%);
+				box-shadow: 0 0 0 2px lighten($value, 20%);
+			}
+		}
+	}
+}
