@@ -9,14 +9,6 @@ const resourceQuery = singleLine`
 	ON r.topic = t.id
 `;
 
-const pagedResourceQuery = singleLine`
-		${resourceQuery}
-		WHERE draft = $1
-		ORDER BY accession DESC
-		LIMIT $2
-		OFFSET $3;
-	`;
-
 export const add = async ({ description, source, title, topic, url }) => {
 	try {
 		const {
@@ -40,17 +32,28 @@ export const add = async ({ description, source, title, topic, url }) => {
 	}
 };
 
-export const count = async ({ draft }) => {
+export const count = async ({ draft, topics = [] }) => {
+	const query = `SELECT COUNT(*) FROM resources WHERE draft = $1 ${topics.length > 0 ? "AND topic = ANY($2::uuid[])" : ""}`;
+	const params = topics.length > 0 ? [draft, topics] : [draft];
+
 	const {
 		rows: [{ count }],
-	} = await db.query("SELECT COUNT(*) FROM resources WHERE draft = $1;", [
-		draft,
-	]);
+	} = await db.query(query, params);
 	return parseInt(count, 10);
 };
 
-export const findAll = async ({ draft, limit, offset }) => {
-	const { rows } = await db.query(pagedResourceQuery, [draft, limit, offset]);
+export const findAll = async ({ draft, topics = [], limit, offset }) => {
+	const pagedResourceQuery = singleLine`
+    ${resourceQuery}
+    WHERE draft = $1
+    ${topics.length > 0 ? " AND r.topic = ANY($4::uuid[])" : ""}
+    ORDER BY accession DESC LIMIT $2 OFFSET $3
+  `;
+
+	const params =
+		topics.length > 0 ? [draft, limit, offset, topics] : [draft, limit, offset];
+
+	const { rows } = await db.query(pagedResourceQuery, params);
 	return rows;
 };
 

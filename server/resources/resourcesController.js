@@ -25,14 +25,19 @@ router
 				draft: Joi.boolean(),
 				page: Joi.number().integer().min(1),
 				perPage: Joi.number().integer().min(1),
+				topics: Joi.string().pattern(/^[0-9a-fA-F-]+(,[0-9a-fA-F-]+)*$/),
 			}).unknown(),
 		}),
 		asyncHandler(async (req, res) => {
-			const { draft, page, perPage } = req.query;
+			const { draft, page, perPage, topics } = req.query;
 			if (draft && !req.superuser && !req.user?.is_admin) {
 				return res.sendStatus(403);
 			}
-			res.send(await service.getAll({ draft }, { page, perPage }));
+
+			const topicsArray = topics ? topics.split(",") : [];
+			res.send(
+				await service.getAll({ draft, topics: topicsArray }, { page, perPage })
+			);
 		})
 	)
 	.post(

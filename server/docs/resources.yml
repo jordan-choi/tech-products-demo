@@ -27,6 +27,13 @@
         schema:
           type: number
           minimum: 1
+      - in: query
+        name: topics
+        description: Filter resources by topics (comma-separated UUIDs).
+        schema:
+          type: string
+          pattern: "^[0-9a-fA-F-]+(,[0-9a-fA-F-]+)*$"
+          example: "123e4567-e89b-12d3-a456-426614174000,456e4567-e89b-12d3-a456-426614174001"
     responses:
       200:
         content:

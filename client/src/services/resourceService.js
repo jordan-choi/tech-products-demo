@@ -23,14 +23,19 @@ export default class ResourceService {
 		}
 	}
 
-	async getPublished({ page, perPage } = {}) {
-		const res = await this.fetch(
-			`${ResourceService.ENDPOINT}?${new URLSearchParams(
-				Object.entries({ page, perPage }).filter(
-					([, value]) => value !== undefined
-				)
-			)}`
+	async getPublished({ page, perPage, topics = [] } = {}) {
+		const params = new URLSearchParams(
+			Object.entries({ page, perPage }).filter(
+				([, value]) => value !== undefined
+			)
 		);
+
+		if (topics.length > 0) {
+			params.append("topics", topics.join(","));
+		}
+
+		const res = await this.fetch(`${ResourceService.ENDPOINT}?${params}`);
+
 		if (res.ok) {
 			const { resources, ...rest } = await res.json();
 			return { ...rest, resources: resources.map(this._revive.bind(this)) };
