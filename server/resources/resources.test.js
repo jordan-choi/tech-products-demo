@@ -279,6 +279,74 @@ describe("/api/resources", () => {
 				.expect(200);
 			expect(draft).toHaveProperty("topic_name", topic.name);
 		});
+
+		it("filters resources by topics", async () => {
+			const { agent: userAgent } = await authenticateAs("user");
+			const { agent: adminAgent } = await authenticateAs("admin");
+
+			const { body: topics } = await userAgent
+				.get("/api/topics")
+				.set("User-Agent", "supertest")
+				.expect(200);
+
+			const [topic1, topic2] = topics;
+
+			await userAgent
+				.post("/api/resources")
+				.send({
+					title: "Resource with Topic 1",
+					url: "https://example.com/1",
+					topic: topic1.id,
+				})
+				.set("User-Agent", "supertest")
+				.expect(201);
+
+			await userAgent
+				.post("/api/resources")
+				.send({
+					title: "Resource with Topic 2",
+					url: "https://example.com/2",
+					topic: topic2.id,
+				})
+				.set("User-Agent", "supertest")
+				.expect(201);
+
+			// Test filtering by a single topic
+			const { body: singleTopicEnvelope } = await adminAgent
+				.get("/api/resources")
+				.query({ draft: true, topics: topic1.id })
+				.set("User-Agent", "supertest")
+				.expect(200);
+
+			expect(singleTopicEnvelope.resources).toHaveLength(1);
+			expect(singleTopicEnvelope.resources[0]).toMatchObject({
+				title: "Resource with Topic 1",
+				topic: topic1.id,
+				topic_name: topic1.name,
+			});
+
+			const { body: multiTopicEnvelope } = await adminAgent
+				.get("/api/resources")
+				.query({ draft: true, topics: `${topic1.id},${topic2.id}` })
+				.set("User-Agent", "supertest")
+				.expect(200);
+
+			expect(multiTopicEnvelope.resources).toHaveLength(2);
+			expect(multiTopicEnvelope.resources).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						title: "Resource with Topic 1",
+						topic: topic1.id,
+						topic_name: topic1.name,
+					}),
+					expect.objectContaining({
+						title: "Resource with Topic 2",
+						topic: topic2.id,
+						topic_name: topic2.name,
+					}),
+				])
+			);
+		});
 	});
 
 	describe("GET /:id", () => {

@@ -17,13 +17,17 @@ export const create = async (resource) => {
 	return await repository.add(resource);
 };
 
-export async function getAll({ draft = false }, { page = 1, perPage = 20 }) {
+export async function getAll(
+	{ draft = false, topics = [] },
+	{ page = 1, perPage = 20 }
+) {
 	const resources = await repository.findAll({
 		draft,
+		topics,
 		limit: perPage,
 		offset: (page - 1) * perPage,
 	});
-	const totalCount = await repository.count({ draft });
+	const totalCount = await repository.count({ draft, topics });
 	return {
 		lastPage: Math.ceil(totalCount / perPage) || 1,
 		page,
