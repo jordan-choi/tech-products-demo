@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import TopicList from ".";
+import FilterTagList from ".";
 
-describe("TopicList", () => {
+describe("FilterTagList", () => {
 	const mockTopics = [
 		{ id: "1", name: "React" },
 		{ id: "2", name: "JavaScript" },
@@ -11,21 +11,21 @@ describe("TopicList", () => {
 	];
 
 	it("displays all topics", () => {
-		render(<TopicList topics={mockTopics} />);
+		render(<FilterTagList topics={mockTopics} />);
 		mockTopics.forEach((topic) => {
 			expect(screen.getByText(topic.name)).toBeInTheDocument();
 		});
 	});
 
 	it('displays "No topic to show" when topics array is empty', () => {
-		render(<TopicList topics={[]} />);
+		render(<FilterTagList topics={[]} />);
 		expect(screen.getByText("No topic to show.")).toBeInTheDocument();
 	});
 
 	it("calls onChange with selected topics when a topic is clicked", async () => {
 		const user = userEvent.setup();
 		const mockOnChange = vi.fn();
-		render(<TopicList topics={mockTopics} onChange={mockOnChange} />);
+		render(<FilterTagList topics={mockTopics} onChange={mockOnChange} />);
 
 		await user.click(screen.getByText(mockTopics[0].name));
 		expect(mockOnChange).toHaveBeenCalledWith([mockTopics[0].id]);
@@ -40,7 +40,7 @@ describe("TopicList", () => {
 	it("removes a topic from selection when clicked again", async () => {
 		const user = userEvent.setup();
 		const mockOnChange = vi.fn();
-		render(<TopicList topics={mockTopics} onChange={mockOnChange} />);
+		render(<FilterTagList topics={mockTopics} onChange={mockOnChange} />);
 
 		await user.click(screen.getByText(mockTopics[0].name));
 		await user.click(screen.getByText(mockTopics[1].name));

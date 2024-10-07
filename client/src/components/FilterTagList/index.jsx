@@ -3,9 +3,9 @@ import { useState } from "react";
 
 import Tag from "../Tag";
 
-import "./TopicList.scss";
+import "./FilterTagList.scss";
 
-export default function TopicList({ topics, onChange }) {
+export default function FilterTagList({ topics, onChange }) {
 	const [selectedTopics, setSelectedTopics] = useState([]);
 
 	const handleTopicClick = (topicId, selected) => {
@@ -35,7 +35,7 @@ export default function TopicList({ topics, onChange }) {
 	);
 }
 
-TopicList.propTypes = {
+FilterTagList.propTypes = {
 	topics: PropTypes.arrayOf(
 		PropTypes.shape({
 			id: PropTypes.string.isRequired,
